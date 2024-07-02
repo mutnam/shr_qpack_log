@@ -3,7 +3,7 @@ name = "shr_qpack_log"
 version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-description = "http3 quack测试工具"
+description = "http3 qpack测试工具"
 readme = "README.md"
 
 [dependencies]
