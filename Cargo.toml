@@ -1,9 +1,10 @@
 [package]
 name = "shr_qpack_log"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 description = "http3 quack测试工具"
+readme = "README.md"
 
 [dependencies]
 bytes = "1.6.0"
