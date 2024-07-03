@@ -117,7 +117,7 @@ impl Lines {
             }
         };
         let (h,l,value_string) = str_decode(b)?;
-        self.0.push(Line::LiteralFieldLinewithNameReference { prefix: 0x01, n, t, name_index, h, value_length:l, value_string, name_value: format!("{}={}",table.1,table.2) });
+        self.0.push(Line::LiteralFieldLinewithNameReference { prefix: 0x01, n, t, name_index, h, value_length:l, value_string, name_value: format!("{}",table.1) });
         Ok(())
     }
     fn line_base_name_ref(&mut self,b:&mut Bytes, byte0: u8) -> Result<(), DecodeError> {
