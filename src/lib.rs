@@ -47,11 +47,11 @@ impl FieldSection {
 }
 #[derive(Debug)]
 pub enum Line {
-    IndexedFieldLine{prefix:u8,t:u8,index:usize,value:String},
-    IndexedFieldLinewithPostBaseIndex{prefix:u8,index:usize},
-    LiteralFieldLinewithNameReference{prefix:u8,n:u8,t:u8,name_index:usize,name_value:String,h:u8,value_length:usize,value_string:String},
-    LiteralFieldLinewithPostBaseNameReference{prefix:u8,n:u8,name_id:usize,h:u8,value_length:usize,value_string:String},
-    LiteralFieldLinewithLiteralName{prefix:u8,n:u8,name_h:u8,name_lenght:usize,name_string:String,value_h:u8,value_length:usize,value_string:String}
+    IndexedFieldLine{prefix:String,t:u8,index:usize,value:String},
+    IndexedFieldLinewithPostBaseIndex{prefix:String,index:usize},
+    LiteralFieldLinewithNameReference{prefix:String,n:u8,t:u8,name_index:usize,name_value:String,h:u8,value_length:usize,value_string:String},
+    LiteralFieldLinewithPostBaseNameReference{prefix:String,n:u8,name_id:usize,h:u8,value_length:usize,value_string:String},
+    LiteralFieldLinewithLiteralName{prefix:String,n:u8,name_h:u8,name_lenght:usize,name_string:String,value_h:u8,value_length:usize,value_string:String}
 }
 pub struct Lines(Vec<Line>);
 impl Lines {
@@ -96,12 +96,12 @@ impl Lines {
                 &(0,"","",0)
             }
         };
-        self.0.push(Line::IndexedFieldLine { prefix: 0b1, t, index: name_index, value:format!("{}={}",table.1,table.2)});
+        self.0.push(Line::IndexedFieldLine { prefix: "1".to_string(), t, index: name_index, value:format!("{}={}",table.1,table.2)});
         Ok(())
     }
     fn line_base_index(&mut self,b:&mut Bytes, byte0: u8) -> Result<(), DecodeError> {
         let name_index = prefixint::decode_byte(b, byte0, 4)?;
-        self.0.push(Line::IndexedFieldLinewithPostBaseIndex { prefix: 0x0001, index: name_index });
+        self.0.push(Line::IndexedFieldLinewithPostBaseIndex { prefix: "0001".to_string(), index: name_index });
         Ok(())
     }
     fn line_name_ref(&mut self,b:&mut Bytes, byte0: u8) -> Result<(), DecodeError> {
@@ -117,14 +117,14 @@ impl Lines {
             }
         };
         let (h,l,value_string) = str_decode(b)?;
-        self.0.push(Line::LiteralFieldLinewithNameReference { prefix: 0x01, n, t, name_index, h, value_length:l, value_string, name_value: format!("{}",table.1) });
+        self.0.push(Line::LiteralFieldLinewithNameReference { prefix: "01".to_string(), n, t, name_index, h, value_length:l, value_string, name_value: format!("{}",table.1) });
         Ok(())
     }
     fn line_base_name_ref(&mut self,b:&mut Bytes, byte0: u8) -> Result<(), DecodeError> {
         let n = (byte0 & 0b0000_1000) >> 3;
         let name_id = prefixint::decode_byte(b, byte0, 3)?;
         let (h,l,value_string) = str_decode(b)?;
-        self.0.push(Line::LiteralFieldLinewithPostBaseNameReference { prefix: 0x0000, n, name_id, h, value_length:l, value_string: value_string});
+        self.0.push(Line::LiteralFieldLinewithPostBaseNameReference { prefix: "0000".to_string(), n, name_id, h, value_length:l, value_string: value_string});
         Ok(())
     }
 
@@ -135,7 +135,7 @@ impl Lines {
         let name_bytes = b.copy_to_bytes(name_len);
         let name_string = str_decode_n(nh,name_bytes)?;
         let (h,l,value_string) = str_decode(b)?;
-        self.0.push(Line::LiteralFieldLinewithLiteralName{ prefix: 0b001, name_h: nh, name_lenght: name_len, name_string, value_h: h, value_string, n, value_length:l });
+        self.0.push(Line::LiteralFieldLinewithLiteralName{ prefix: "001".to_string(), name_h: nh, name_lenght: name_len, name_string, value_h: h, value_string, n, value_length:l });
         Ok(())
     }
 
