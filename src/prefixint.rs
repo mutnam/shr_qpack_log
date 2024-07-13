@@ -64,6 +64,8 @@ pub fn decode<B: Buf>(buf: &mut B,size: u8) -> Result<usize,DecodeError> {
         if byte1 < 127 {
             pre_len += byte1;
             break;
+        }else{
+            pre_len += 127;
         }
     }
     return Ok(pre_len);
@@ -130,6 +132,8 @@ pub fn decode_byte<B: Buf>(buf: &mut B, byte: u8, size: u8) -> Result<usize,Deco
         if byte1 < 127 {
             pre_len += byte1;
             break;
+        }else{
+            pre_len += 127;
         }
     }
     return Ok(pre_len);
