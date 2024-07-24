@@ -1,4 +1,6 @@
 
+use std::io::Read;
+
 use bytes::{Buf, Bytes};
 use error::DecodeError;
 use table::FIELD_TABLE;
@@ -59,6 +61,7 @@ impl Lines {
         Self(Vec::new())
     }
     pub fn build(&mut self,b:&mut Bytes)->Result<(),DecodeError>{
+      
         loop {
             if b.has_remaining() {
                 self.line(b)?; 
@@ -105,6 +108,7 @@ impl Lines {
         Ok(())
     }
     fn line_name_ref(&mut self,b:&mut Bytes, byte0: u8) -> Result<(), DecodeError> {
+       
         let n = (byte0 & 0b0010_0000) >> 5;
         let t = (byte0 & 0b0001_0000) >> 4;
         let name_index = prefixint::decode_byte(b, byte0, 4)?;
@@ -162,8 +166,10 @@ fn str_decode_n(hm:u8,b: Bytes)->Result<String,DecodeError>{
         }
     }
 }
-fn str_decode<B: Buf>(b: &mut B)->Result<(u8,usize,String),DecodeError>{
+fn str_decode(b: &mut Bytes)->Result<(u8,usize,String),DecodeError>{
+   
     let byte1 = b.get_u8();
+ 
     let value_len = prefixint::decode_byte(b, byte1, 7)?;
     if byte1>>7 == 0b1 {
         let  hm_bytes = b.copy_to_bytes(value_len);
@@ -213,6 +219,7 @@ impl HeaderFrame {
         let len = varint::decode(b)?;
         self.length = Some(len);
         *b = b.copy_to_bytes(len as usize);
+        println!("#######=>>>>{:?}",b.bytes());
         Ok(())
     }
 }
@@ -235,7 +242,7 @@ mod tests {
     use super::*;
     #[test]
     fn it_worksa() {
-       let v=[1, 64, 130, 0, 0, 209, 215, 80, 143, 53, 43, 250, 241, 235, 192, 235, 173, 114, 30, 155, 141, 62, 251, 255, 193, 95, 80, 231, 208, 127, 102, 162, 129, 176, 218, 224, 82, 26, 235, 160, 188, 139, 30, 99, 37, 134, 217, 117, 118, 92, 83, 250, 205, 143, 126, 140, 255, 74, 80, 110, 165, 83, 17, 73, 212, 255, 106, 16, 244, 214, 52, 154, 58, 11, 246, 167, 43, 199, 144, 186, 74, 150, 4, 184, 62, 212, 255, 115, 165, 53, 162, 227, 12, 78, 148, 214, 202, 254, 8, 121, 10, 189, 69, 75, 31, 218, 151, 167, 176, 244, 149, 128, 133, 197, 192, 184, 95, 101, 229, 221, 113, 77, 195, 148, 118, 25, 134, 217, 117, 118, 92, 221, 223];
+       let v=[1, 49, 0, 0, 209, 215, 80, 141, 34, 23, 159, 207, 171, 106, 232, 101, 201, 85, 198, 154, 103, 81, 156, 96, 200, 69, 165, 71, 249, 64, 227, 45, 8, 131, 2, 197, 26, 61, 124, 33, 35, 73, 96, 24, 199, 240, 105, 32, 142, 56, 227, 240, 72, 237, 210, 58, 57, 53, 104, 6, 103, 114, 101, 97, 115, 101];
         let x = Decoder::new(v.to_vec()).parse();
         println!("###{:#?}",x);
     }

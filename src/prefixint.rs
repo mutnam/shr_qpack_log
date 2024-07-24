@@ -56,16 +56,16 @@ pub fn decode<B: Buf>(buf: &mut B,size: u8) -> Result<usize,DecodeError> {
             }
         }
         _ => {
-            return Err(DecodeError::new("字段可变整形", "超出范围"));
+            return Err(DecodeError::new("prefixint", "size在2..=8之间"));
         }
     };
+    let mut power = 0usize;
     loop {
-        let byte1 = (buf.get_u8() & 127) as usize;
-        if byte1 < 127 {
-            pre_len += byte1;
+        let byte1 = buf.get_u8() as usize;
+        pre_len+=(byte1 &127)<<power;
+        power +=7;
+        if byte1 & 128 == 128 {
             break;
-        }else{
-            pre_len += 127;
         }
     }
     return Ok(pre_len);
@@ -124,16 +124,16 @@ pub fn decode_byte<B: Buf>(buf: &mut B, byte: u8, size: u8) -> Result<usize,Deco
             }
         }
         _ => {
-            return Err(DecodeError::new("字段可变整形", "超出范围"));
+            return Err(DecodeError::new("prefixint", "size在2..=8之间"));
         }
     };
+    let mut power = 0usize;
     loop {
-        let byte1 = (buf.get_u8() & 127) as usize;
-        if byte1 < 127 {
-            pre_len += byte1;
+        let byte1 = buf.get_u8() as usize;
+        pre_len+=(byte1 & 127) << power;
+        power +=7;
+        if byte1 & 128 == 0 {
             break;
-        }else{
-            pre_len += 127;
         }
     }
     return Ok(pre_len);
